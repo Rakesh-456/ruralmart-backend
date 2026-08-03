@@ -6,8 +6,10 @@ import com.ruralmart.enums.Role;
 import com.ruralmart.exception.UserAlreadyExistsException;
 import com.ruralmart.repository.UserRepository;
 import com.ruralmart.response.UserResponse;
+import com.ruralmart.security.JwtService;
 import com.ruralmart.service.UserService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.ruralmart.dto.LoginRequest;
 import com.ruralmart.response.LoginResponse;
@@ -19,11 +21,17 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    private final JwtService jwtService;
+
+    public UserServiceImpl(UserRepository userRepository,
+                           PasswordEncoder passwordEncoder,
+                           JwtService jwtService) {
+
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
 
@@ -70,8 +78,10 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Invalid email or password");
         }
 
+        String token = jwtService.generateToken(user.getEmail());
+
         return new LoginResponse(
-                "dummy-token",
+                token,
                 "Login successful"
         );
     }

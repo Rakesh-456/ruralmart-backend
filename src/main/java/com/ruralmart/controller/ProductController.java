@@ -42,6 +42,7 @@ public class ProductController {
 
     @GetMapping
     public List<Product> getAllProducts(){
+        System.out.println("Inside Product Controller");
         return service.getAllProducts();
     }
 
@@ -81,4 +82,5 @@ public class ProductController {
 
         return service.getProducts(page, size);
     }
+
 }
