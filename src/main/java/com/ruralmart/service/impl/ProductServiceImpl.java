@@ -11,6 +11,7 @@ import com.ruralmart.exception.UnauthorizedProductAccessException;
 import com.ruralmart.repository.ProductRepo;
 import com.ruralmart.repository.ShopRepository;
 import com.ruralmart.repository.UserRepository;
+import com.ruralmart.response.DashboardResponse;
 import com.ruralmart.response.ProductResponse;
 import com.ruralmart.response.ShopSummaryResponse;
 import com.ruralmart.service.ProductService;
@@ -187,5 +188,29 @@ public class ProductServiceImpl implements ProductService {
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    @Override
+    public DashboardResponse getDashboard() {
+
+        Shop shop = getCurrentUserShop();
+
+        long totalProducts = productRepo.countByShop(shop);
+
+        long activeProducts =
+                productRepo.countByShopAndStatus(shop, ProductStatus.ACTIVE);
+
+        long inactiveProducts =
+                productRepo.countByShopAndStatus(shop, ProductStatus.INACTIVE);
+
+        long outOfStockProducts =
+                productRepo.countByShopAndStock(shop, 0);
+
+        return new DashboardResponse(
+                totalProducts,
+                activeProducts,
+                inactiveProducts,
+                outOfStockProducts
+        );
     }
 }

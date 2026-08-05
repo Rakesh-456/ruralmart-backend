@@ -3,6 +3,7 @@ package com.ruralmart.service;
 import com.ruralmart.dto.ProductRequest;
 import com.ruralmart.entity.Product;
 import com.ruralmart.enums.Category;
+import com.ruralmart.response.DashboardResponse;
 import com.ruralmart.response.ProductResponse;
 import org.springframework.data.domain.Page;
 
@@ -27,4 +28,6 @@ public interface ProductService {
     Page<ProductResponse> getProducts(int page, int size);
 
     List<ProductResponse> getMyShopProducts();
+
+    DashboardResponse getDashboard();
 }

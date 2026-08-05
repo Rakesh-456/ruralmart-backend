@@ -1,6 +1,7 @@
 package com.ruralmart.controller;
 
 import com.ruralmart.enums.Category;
+import com.ruralmart.response.DashboardResponse;
 import com.ruralmart.response.ProductResponse;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -91,6 +92,11 @@ public class ProductController {
             @RequestParam(defaultValue = "5") int size) {
 
         return service.getProducts(page, size);
+    }
+
+    @GetMapping("/dashboard")
+    public DashboardResponse getDashboard() {
+        return service.getDashboard();
     }
 
 }
