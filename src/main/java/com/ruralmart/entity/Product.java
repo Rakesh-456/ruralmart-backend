@@ -1,12 +1,21 @@
 package com.ruralmart.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import com.ruralmart.enums.Category;
 import com.ruralmart.enums.ProductStatus;
+import jakarta.persistence.OneToMany;
+
+import java.util.List;
 
 @Entity
 @Table(name = "products")
 public class    Product {
+
+    @ManyToOne
+    @JoinColumn(name = "shop_id", nullable = false)
+    @JsonBackReference
+    private Shop shop;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +48,7 @@ public class    Product {
 
     public Product(Long id, String name, String description, Category category,
                    double price, int stock, String brand,
-                   String unit, String imageUrl, ProductStatus status) {
+                   String unit, String imageUrl, ProductStatus status, Shop shop) {
 
         this.id = id;
         this.name = name;
@@ -51,6 +60,7 @@ public class    Product {
         this.unit = unit;
         this.imageUrl = imageUrl;
         this.status = status;
+        this.shop = shop;
     }
 
     // Getters & Setters
@@ -134,4 +144,13 @@ public class    Product {
     public void setStatus(ProductStatus status) {
         this.status = status;
     }
+
+    public Shop getShop() {
+        return shop;
+    }
+
+    public void setShop(Shop shop) {
+        this.shop = shop;
+    }
+
 }

@@ -37,4 +37,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleUserAlreadyExists(UserAlreadyExistsException ex) {
         return ResponseEntity.badRequest().body(ex.getMessage());
     }
+
+    @ExceptionHandler(ShopAlreadyExistsException.class)
+    public ResponseEntity<String> handleShopAlreadyExistsException(
+            ShopAlreadyExistsException ex) {
+
+        return ResponseEntity
+                .badRequest()
+                .body(ex.getMessage());
+    }
 }

@@ -1,6 +1,7 @@
 package com.ruralmart.response;
 
 import com.ruralmart.enums.Category;
+import com.ruralmart.enums.ProductStatus;
 
 public class ProductResponse {
 
@@ -13,8 +14,9 @@ public class ProductResponse {
     private String brand;
     private String unit;
     private String imageUrl;
+    private ProductStatus status;
+    private ShopSummaryResponse shop;
 
-    // Constructors
     public ProductResponse() {
     }
 
@@ -26,7 +28,9 @@ public class ProductResponse {
                            int stock,
                            String brand,
                            String unit,
-                           String imageUrl) {
+                           String imageUrl,
+                           ProductStatus status,
+                           ShopSummaryResponse shop) {
 
         this.id = id;
         this.name = name;
@@ -37,9 +41,9 @@ public class ProductResponse {
         this.brand = brand;
         this.unit = unit;
         this.imageUrl = imageUrl;
+        this.status = status;
+        this.shop = shop;
     }
-
-    // Getters & Setters
 
     public Long getId() {
         return id;
@@ -49,12 +53,12 @@ public class ProductResponse {
         return name;
     }
 
-    public Category getCategory() {
-        return category;
-    }
-
     public String getDescription() {
         return description;
+    }
+
+    public Category getCategory() {
+        return category;
     }
 
     public double getPrice() {
@@ -75,6 +79,14 @@ public class ProductResponse {
 
     public String getImageUrl() {
         return imageUrl;
+    }
+
+    public ProductStatus getStatus() {
+        return status;
+    }
+
+    public ShopSummaryResponse getShop() {
+        return shop;
     }
 
     public void setId(Long id) {
@@ -111,5 +123,13 @@ public class ProductResponse {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public void setStatus(ProductStatus status) {
+        this.status = status;
+    }
+
+    public void setShop(ShopSummaryResponse shop) {
+        this.shop = shop;
     }
 }

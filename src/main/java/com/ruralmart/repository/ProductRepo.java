@@ -1,5 +1,6 @@
 package com.ruralmart.repository;
 
+import com.ruralmart.entity.Shop;
 import com.ruralmart.enums.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import com.ruralmart.entity.Product;
@@ -17,5 +18,7 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
     List<Product> searchProducts(@Param("keyword") String keyword);
 
     List<Product> searchByCategory(Category category);
+
+    List<Product> findByShop(Shop shop);
 
 }

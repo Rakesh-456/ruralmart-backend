@@ -23,8 +23,14 @@ public class ProductController {
         this.service = service;
     }
 
+    @GetMapping("/my-shop")
+    public List<ProductResponse> getMyShopProducts() {
+        return service.getMyShopProducts();
+    }
+
     @PostMapping
-    public Product addProduct(@Valid @RequestBody ProductRequest request) {
+    public ProductResponse addProduct(
+            @Valid @RequestBody ProductRequest request) {
 
         Product product = new Product();
 
@@ -36,13 +42,13 @@ public class ProductController {
         product.setBrand(request.getBrand());
         product.setUnit(request.getUnit());
         product.setImageUrl(request.getImageUrl());
+        System.out.println("Inside addProduct Controller");
 
         return service.addProduct(product);
     }
 
     @GetMapping
-    public List<Product> getAllProducts(){
-        System.out.println("Inside Product Controller");
+    public List<ProductResponse> getAllProducts() {
         return service.getAllProducts();
     }
 
@@ -52,8 +58,9 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable Long id,
-                                 @Valid @RequestBody ProductRequest request) {
+    public ProductResponse updateProduct(
+            @PathVariable Long id,
+            @Valid @RequestBody ProductRequest request) {
 
         return service.updateProduct(id, request);
     }
@@ -65,18 +72,21 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public List<Product> searchProducts(
-            @RequestParam String keyword){
+    public List<ProductResponse> searchProducts(
+            @RequestParam String keyword) {
+
         return service.searchProducts(keyword);
     }
 
     @GetMapping("/category/{category}")
-    public List<Product> searchProductsByCategory(@PathVariable Category category){
+    public List<ProductResponse> searchProductsByCategory(
+            @PathVariable Category category) {
+
         return service.searchProductsByCategory(category);
     }
 
     @GetMapping("/page")
-    public Page<Product> getProducts(
+    public Page<ProductResponse> getProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
 
