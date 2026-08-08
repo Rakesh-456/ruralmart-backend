@@ -56,4 +56,44 @@ public class ShopServiceImpl implements ShopService {
 
         return shopRepository.save(shop);
     }
+
+    private User getCurrentUser() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+    }
+
+    @Override
+    public Shop getMyShop() {
+
+        User owner = getCurrentUser();
+
+        return shopRepository.findByOwner(owner)
+                .orElseThrow(() ->
+                        new RuntimeException("Shop not found"));
+    }
+
+    @Override
+    public Shop updateMyShop(ShopRequest request) {
+
+        Shop shop = getMyShop();
+
+        shop.setShopName(request.getShopName());
+
+        shop.setPhoneNumber(request.getPhoneNumber());
+
+        shop.setAddress(request.getAddress());
+
+        shop.setDescription(request.getDescription());
+
+        shop.setUpdatedAt(LocalDateTime.now());
+
+        return shopRepository.save(shop);
+    }
 }

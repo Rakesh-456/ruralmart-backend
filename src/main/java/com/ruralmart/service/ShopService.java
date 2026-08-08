@@ -7,4 +7,7 @@ public interface ShopService {
 
     Shop createShop(ShopRequest request);
 
+    Shop getMyShop();
+
+    Shop updateMyShop(ShopRequest request);
 }

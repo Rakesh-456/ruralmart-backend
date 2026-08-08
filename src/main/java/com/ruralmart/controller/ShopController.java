@@ -22,4 +22,14 @@ public class ShopController {
 
     }
 
+    @GetMapping("/my-shop")
+    public Shop getMyShop() {
+        return shopService.getMyShop();
+    }
+
+    @PutMapping("/my-shop")
+    public Shop updateMyShop(@Valid @RequestBody ShopRequest request) {
+        return shopService.updateMyShop(request);
+    }
+
 }
