@@ -59,9 +59,6 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, unique = true)
-    private String phoneNumber;
-
     @Column(nullable = false)
     private String password;
 
@@ -74,27 +71,23 @@ public class User implements UserDetails {
 
     private LocalDateTime updatedAt;
 
-
-
     public User() {
     }
 
     public User(Long id,
                 String fullName,
-                String email, String phoneNumber,
+                String email,
                 String password, Role role, boolean enabled,
                 LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
-        this.phoneNumber = phoneNumber;
         this.password = password;
         this.role = role;
         this.enabled = enabled;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
-
 
     public Long getId() {
         return id;
@@ -106,10 +99,6 @@ public class User implements UserDetails {
 
     public String getEmail() {
         return email;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
     }
 
     public Role getRole() {
@@ -135,10 +124,6 @@ public class User implements UserDetails {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
     }
 
     public void setPassword(String password) {

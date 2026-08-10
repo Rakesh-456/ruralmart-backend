@@ -2,6 +2,7 @@ package com.ruralmart.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -45,5 +46,24 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .badRequest()
                 .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(OtpValidationException.class)
+    public ResponseEntity<String> handleOtpValidationException(
+            OtpValidationException ex) {
+
+        return ResponseEntity
+                .badRequest()
+                .body(ex.getMessage());
+    }
+
+    // NEW: SMTP/auth failures (e.g. wrong Gmail App Password, host
+    // unreachable) surface as a MailException from JavaMailSender. Without
+    // this handler they'd fall through as an opaque 500 with no message.
+    @ExceptionHandler(MailException.class)
+    public ResponseEntity<String> handleMailException(MailException ex) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Couldn't send the verification email. Please try again in a moment.");
     }
 }

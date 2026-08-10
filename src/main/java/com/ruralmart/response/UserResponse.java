@@ -7,7 +7,6 @@ public class UserResponse {
     private Long id;
     private String fullName;
     private String email;
-    private String phoneNumber;
     private Role role;
 
     public UserResponse() {
@@ -16,12 +15,10 @@ public class UserResponse {
     public UserResponse(Long id,
                         String fullName,
                         String email,
-                        String phoneNumber,
                         Role role) {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
-        this.phoneNumber = phoneNumber;
         this.role = role;
     }
 
@@ -39,10 +36,6 @@ public class UserResponse {
         return email;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
     public Role getRole() {
         return role;
     }
@@ -57,10 +50,6 @@ public class UserResponse {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
     }
 
     public void setRole(Role role) {
