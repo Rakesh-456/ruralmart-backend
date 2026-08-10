@@ -33,7 +33,8 @@ public class UserServiceImpl implements UserService {
     private final JwtService jwtService;
 
     // Handles OTP generation/verification for both registration and
-    // password reset (kept separate internally via OtpPurpose).
+    // password reset (kept separate internally via OtpPurpose). Email-only
+    // - phone number plays no part in OTP verification.
     private final OtpService otpService;
 
     public UserServiceImpl(UserRepository userRepository,
@@ -47,7 +48,7 @@ public class UserServiceImpl implements UserService {
         this.otpService = otpService;
     }
 
-    // Step 1 of registration.
+    // Step 1 of registration - email OTP only.
     @Override
     public void sendRegistrationOtp(SendOtpRequest request) {
 
@@ -65,7 +66,12 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistsException("Email already registered");
         }
 
-        // The User row is only created if this succeeds. Throws
+        if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new UserAlreadyExistsException("Phone number already registered");
+        }
+
+        // The User row is only created if this succeeds - an unverified
+        // email can never result in a registered account. Throws
         // OtpValidationException (not found / expired / incorrect) and
         // consumes the OTP on success so it can't be replayed.
         otpService.verifyOtp(request.getEmail(), request.getOtp(), OtpPurpose.REGISTRATION);
@@ -74,6 +80,7 @@ public class UserServiceImpl implements UserService {
 
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
+        user.setPhoneNumber(request.getPhoneNumber());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(Role.CUSTOMER);
         user.setEnabled(true);
@@ -85,11 +92,13 @@ public class UserServiceImpl implements UserService {
                 savedUser.getId(),
                 savedUser.getFullName(),
                 savedUser.getEmail(),
+                savedUser.getPhoneNumber(),
                 savedUser.getRole()
         );
     }
 
-    // UNCHANGED: OTP is not involved in login at all.
+    // UNCHANGED: OTP is not involved in login at all. Existing JWT flow
+    // preserved exactly - verify credentials, generateToken, return.
     @Override
     public LoginResponse login(LoginRequest request) {
 
@@ -125,6 +134,7 @@ public class UserServiceImpl implements UserService {
                 user.getId(),
                 user.getFullName(),
                 user.getEmail(),
+                user.getPhoneNumber(),
                 user.getRole()
         );
     }
@@ -141,7 +151,14 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() ->
                         new RuntimeException("User not found"));
 
+        if (!user.getPhoneNumber().equals(request.getPhoneNumber())
+                && userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+
+            throw new UserAlreadyExistsException("Phone number already registered");
+        }
+
         user.setFullName(request.getFullName());
+        user.setPhoneNumber(request.getPhoneNumber());
         user.setUpdatedAt(LocalDateTime.now());
 
         User updatedUser = userRepository.save(user);
@@ -150,6 +167,7 @@ public class UserServiceImpl implements UserService {
                 updatedUser.getId(),
                 updatedUser.getFullName(),
                 updatedUser.getEmail(),
+                updatedUser.getPhoneNumber(),
                 updatedUser.getRole()
         );
     }
@@ -197,22 +215,21 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
-    // NEW: forgot-password, step 1.
+    // Forgot-password, step 1 - email OTP only, phone not involved.
     @Override
     public void sendPasswordResetOtp(SendOtpRequest request) {
 
         // Deliberately does NOT throw if the email isn't registered - the
         // controller always returns the same generic success message either
-        // way. Revealing "that email doesn't exist" here would let anyone
-        // probe which emails have accounts (a classic account-enumeration
-        // leak on password-reset endpoints), so we only actually send an
-        // email when the account is real, and stay silent otherwise.
+        // way, to avoid leaking which emails have accounts (account
+        // enumeration). Only actually sends an email when the account is real.
         if (userRepository.existsByEmail(request.getEmail())) {
             otpService.generateAndSendOtp(request.getEmail(), OtpPurpose.PASSWORD_RESET);
         }
     }
 
-    // NEW: forgot-password, step 2.
+    // Forgot-password, step 2. Does NOT issue a JWT - the user logs in
+    // normally afterwards through the existing /api/auth/login flow.
     @Override
     public void resetPassword(ResetPasswordRequest request) {
 

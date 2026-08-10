@@ -1,5 +1,6 @@
 package com.ruralmart.security;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,32 +41,52 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String jwt = authHeader.substring(7);
-        String email = jwtService.extractUsername(jwt);
 
-        if (email != null &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
+        // FIX: extractUsername()/isTokenValid() call into the JJWT parser,
+        // which throws (ExpiredJwtException, MalformedJwtException,
+        // SignatureException, etc - all JwtException) for any bad token.
+        // This filter runs on EVERY request, including permitAll ones like
+        // /api/auth/register - so an expired/garbage token previously
+        // crashed the whole filter chain with an uncaught exception before
+        // Spring Security ever got to evaluate whether the endpoint even
+        // requires auth, surfacing as a raw 401/403/500 on public endpoints.
+        // Catching it here and just skipping authentication is the correct
+        // behavior: permitAll endpoints proceed normally, and protected
+        // endpoints correctly fall through to Spring Security's normal
+        // "not authenticated" handling instead of an unhandled crash.
+        try {
+            String email = jwtService.extractUsername(jwt);
 
-            UserDetails userDetails =
-                    userDetailsService.loadUserByUsername(email);
+            if (email != null &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            if (jwtService.isTokenValid(jwt, userDetails.getUsername())) {
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(email);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities());
+                if (jwtService.isTokenValid(jwt, userDetails.getUsername())) {
 
-                authentication.setDetails(
-                        new WebAuthenticationDetailsSource()
-                                .buildDetails(request));
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities());
 
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authentication);
+                    authentication.setDetails(
+                            new WebAuthenticationDetailsSource()
+                                    .buildDetails(request));
+
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(authentication);
+                }
             }
+        } catch (JwtException | IllegalArgumentException | org.springframework.security.core.userdetails.UsernameNotFoundException ex) {
+            // Invalid/expired/malformed token, or a token for a user that
+            // no longer exists - treat as unauthenticated rather than
+            // crashing the request. Protected endpoints will still
+            // correctly reject with 401 since no Authentication was set.
+            SecurityContextHolder.clearContext();
         }
 
-        // THIS IS MISSING
         filterChain.doFilter(request, response);
     }
 
