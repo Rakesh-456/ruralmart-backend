@@ -170,7 +170,7 @@ Protected APIs
 ## Clone the Repository
 
 ```bash
-git clone https://github.com/Rakesh-456/ruralmart.git
+git clone https://github.com/Rakesh-456/ruralmart-backend.git
 ```
 
 ```
